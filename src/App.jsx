@@ -10,7 +10,8 @@ import {
   Info,
   Activity,
   BarChart3,
-  Divide
+  Divide,
+  ChevronLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FileUpload from './components/FileUpload';
@@ -145,20 +146,27 @@ function App() {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="landing-logo"
               >
-                <img src="/logo.png" alt="Humanly" />
+                <img 
+                  src="/logo.png" 
+                  alt="Humanly" 
+                  style={{ 
+                    height: '350px', 
+                    filter: 'drop-shadow(0 0 50px rgba(255,255,255,0.15))' 
+                  }} 
+                />
               </motion.div>
               
               <motion.h1 
-                initial={{ y: 20, opacity: 0 }}
+                initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
                 className="landing-title"
               >
                 Escribe sin Barreras, <span className="text-gradient">Vive la Autenticidad</span>
               </motion.h1>
               
               <motion.p 
-                initial={{ y: 20, opacity: 0 }}
+                initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
                 className="landing-subtitle"
@@ -168,16 +176,18 @@ function App() {
               </motion.p>
 
               <motion.div 
-                initial={{ y: 20, opacity: 0 }}
+                initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <button 
                   onClick={() => setShowApp(true)} 
                   className="btn btn-primary btn-landing"
                 >
                   <span>Entrar a Humanly</span>
-                  <Zap size={20} />
+                  <Zap size={22} className="btn-icon-pulse" />
                 </button>
               </motion.div>
 
@@ -202,13 +212,24 @@ function App() {
             style={{ width: '100%', height: '100%' }}
           >
             <nav className="navbar">
-              <div className="logo-container" onClick={reset}>
-                <div className="logo-icon" style={{ background: 'none', padding: 0, boxShadow: 'none' }}>
-                  <img src="/logo.png" alt="Humanly" style={{ height: '250px', objectFit: 'contain' }} />
-                </div>
-                <div className="brand-info">
-                  <span className="logo-text">Humanly</span>
-                  <span className="beta-badge">BETA</span>
+              <div className="nav-left">
+                <motion.button 
+                  whileHover={{ x: -5 }}
+                  onClick={() => setShowApp(false)} 
+                  className="btn-back"
+                >
+                  <ChevronLeft size={20} />
+                  <span>Volver</span>
+                </motion.button>
+
+                <div className="logo-container" onClick={reset}>
+                  <div className="logo-icon" style={{ background: 'none', padding: 0, boxShadow: 'none' }}>
+                    <img src="/logo.png" alt="Humanly" style={{ height: '350px', objectFit: 'contain' }} />
+                  </div>
+                  <div className="brand-info">
+                    <span className="logo-text">Humanly</span>
+                    <span className="beta-badge">BETA</span>
+                  </div>
                 </div>
               </div>
               

@@ -33,14 +33,15 @@ body {
 }
 
 .navbar {
-  padding: 0 4rem;
+  padding: 1rem 4rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(20px);
-  min-height: 100px;
-  margin-top: -2rem;
+  min-height: 120px;
+  position: relative;
+  z-index: 100;
 }
 
 .logo-container {
@@ -52,9 +53,35 @@ body {
 .brand-info {
   display: flex;
   align-items: center;
-  margin-top: -6.5rem;
+  margin-top: -9rem;
   position: relative;
   z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.btn-back {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .logo-text {
@@ -407,6 +434,57 @@ body {
 
 /* Fix for existing navbar in app mode */
 .navbar {
-  margin-top: 0; /* Removing negative margin when in app mode for better alignment */
-  padding: 1rem 4rem;
+  margin-top: 0;
+  padding: 1.5rem 4rem;
+}
+
+/* Dynamic Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-soft {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.landing-logo, .logo-icon img {
+  animation: float 6s ease-in-out infinite;
+}
+
+.btn-icon-pulse {
+  animation: pulse-soft 2s infinite;
+}
+
+.btn-landing {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-landing::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  transform: scale(0);
+  transition: transform 0.6s ease-out;
+  pointer-events: none;
+}
+
+.btn-landing:hover::after {
+  transform: scale(1);
+}
+
+.card-header, .analysis-details, .humanized-result-box {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-header:hover, .humanized-result-box:hover {
+  transform: translateY(-2px);
 }
