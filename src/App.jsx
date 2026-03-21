@@ -133,10 +133,10 @@ function App() {
       <nav className="navbar">
         <div className="logo-container" onClick={reset}>
           <div className="logo-icon" style={{ background: 'none', padding: 0, boxShadow: 'none' }}>
-            <img src="/logo.png" alt="Humanly AI" style={{ height: '250px', objectFit: 'contain' }} />
+            <img src="/logo.png" alt="Humanly" style={{ height: '250px', objectFit: 'contain' }} />
           </div>
           <div className="brand-info">
-            <span className="logo-text">Humanly AI</span>
+            <span className="logo-text">Humanly</span>
             <span className="beta-badge">BETA</span>
           </div>
         </div>
