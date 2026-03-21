@@ -167,7 +167,8 @@ function App() {
                   alt="Humanly" 
                   style={{ 
                     height: '450px', 
-                    filter: 'drop-shadow(0 0 60px rgba(255,255,255,0.2))' 
+                    filter: 'drop-shadow(0 0 80px rgba(255,255,255,0.2))',
+                    transition: 'all 0.8s ease'
                   }} 
                 />
               </motion.div>
@@ -240,6 +241,16 @@ function App() {
                   <span>HUMANLY.AI</span>
                 </div>
               </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="scroll-hint"
+                style={{ marginTop: '5vh', color: '#444', fontSize: '0.8rem', letterSpacing: '0.2em' }}
+              >
+                SCROLL TO EXPLORE
+              </motion.div>
             </div>
           </motion.div>
         ) : (
@@ -263,7 +274,7 @@ function App() {
 
                 <div className="logo-container" onClick={reset}>
                   <div className="logo-icon" style={{ background: 'none', padding: 0, boxShadow: 'none' }}>
-                    <img src="/logo.png" alt="Humanly" style={{ height: '350px', objectFit: 'contain' }} />
+                    <img src="/logo.png" alt="Humanly" style={{ height: '120px', objectFit: 'contain' }} />
                   </div>
                   <div className="brand-info">
                     <span className="logo-text">Humanly</span>
@@ -273,8 +284,11 @@ function App() {
               </div>
               
               <div className="nav-actions">
-                <div className="beta-info">Public Beta v1.0</div>
-                <div className="badge-free">100% Free Access</div>
+                <div className="beta-info">
+                  <span className="dot" />
+                  PUBLIC BETA V1.0
+                </div>
+                <div className="badge-free">100% FREE ACCESS</div>
               </div>
             </nav>
 
