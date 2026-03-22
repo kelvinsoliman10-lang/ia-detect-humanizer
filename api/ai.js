@@ -5,52 +5,74 @@ export default async function handler(req, res) {
   }
 
   const { action, text } = req.body;
-  const ACCOUNT_ID = process.env.VITE_CLOUDFLARE_ACCOUNT_ID;
-  const API_TOKEN = process.env.VITE_CLOUDFLARE_API_TOKEN;
-
-  if (!ACCOUNT_ID || !API_TOKEN) {
-    return res.status(500).json({ error: 'Cloudflare credentials not configured' });
-  }
+  const CLOUD_ACCOUNT_ID = process.env.VITE_CLOUDFLARE_ACCOUNT_ID;
+  const CLOUD_API_TOKEN = process.env.VITE_CLOUDFLARE_API_TOKEN;
+  const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY;
 
   try {
     let systemPrompt = "";
-    let userPrompt = text;
-
     if (action === 'detect') {
       systemPrompt = "Analyze the text and determine the probability (0-100%) that it was AI-generated. Return ONLY a JSON object: {\"score\": number, \"analysis\": \"string\", \"suspiciousPhrases\": [\"string\"]}";
     } else if (action === 'humanize') {
-      systemPrompt = `Eres un Humanizador de Textos de Grado Profesional especializado en comunicación académica y empresarial.
-      Tu tarea es reescribir el texto para que parezca escrito por un humano experto, cumpliendo estas reglas MANDATORIAS:
-      1. INTEGRIDAD DEL TONO: El tono resultante debe coincidir EXACTAMENTE con el original. Si es formal, la salida debe ser formal y elegante.
-      2. PROHIBICIÓN DE MULETILLAS: Tienes estrictamente prohibido usar frases como "La verdad es que", "Para ir cerrando", "En fin", "Yo diría que" o cualquier conector conversacional informal.
-      3. GRAMÁTICA IMPECABLE: No generes oraciones sin sentido gramatical. Respeta la concordancia de género y número.
-      4. VARIACIÓN SINTÁCTICA: Cambia la estructura de las oraciones (activa por pasiva, cambio de orden de complementos) para romper patrones de IA, pero mantén el significado léxico preciso.
-      5. PRESERVACIÓN ESTRUCTURAL: No añadas ni quites párrafos. Mantén los espacios y saltos de línea originales.
+      systemPrompt = `Eres un Humanizador de Textos de Grado Profesional. 
+      Tu misión es reescribir el texto para que parezca 100% humano, eliminando cualquier rastro de IA pero manteniendo la esencia, el formato y el tono original.
+      REGLAS DE ORO:
+      1. GRAMÁTICA PERFECTA: No inventes palabras ni rompas la estructura gramatical.
+      2. CERO MULETILLAS: Prohibido usar "En fin", "La verdad es que", "Yo diría", etc.
+      3. SERIEDAD: Si el texto es formal, la respuesta DEBE ser formal.
+      4. FIDELIDAD: No añadas ni quites información. Solo cambia el estilo.
+      Devuelve ÚNICAMENTE el texto humanizado.`;
+    }
+
+    // --- PRIORIDAD 1: GEMINI 1.5 FLASH (SI HAY API KEY) ---
+    if (GEMINI_API_KEY && GEMINI_API_KEY !== 'TU_API_KEY_AQUI') {
+      console.log("Using Gemini 1.5 Flash...");
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
       
-      Objetivo: Que el texto se sienta fluido y natural, pero conserve la seriedad y precisión del original.
-      Devuelve ÚNICAMENTE el texto humanizado. No añadas introducciones ni cierres.`;
+      const geminiResponse = await fetch(geminiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: `${systemPrompt}\n\nTEXTO:\n${text}` }]
+          }]
+        })
+      });
+
+      if (geminiResponse.ok) {
+        const data = await geminiResponse.json();
+        const responseText = data.candidates[0].content.parts[0].text.trim();
+        return res.status(200).json({ response: responseText });
+      } else {
+        console.error("Gemini failed, falling back to Cloudflare...");
+      }
+    }
+
+    // --- PRIORIDAD 2: CLOUDFLARE LLAMA 3.1 (FALLBACK) ---
+    if (!CLOUD_ACCOUNT_ID || !CLOUD_API_TOKEN) {
+      return res.status(500).json({ error: 'Missing AI credentials' });
     }
 
     const model = "@cf/meta/llama-3.1-8b-instruct";
-    const url = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/ai/run/${model}`;
+    const url = `https://api.cloudflare.com/client/v4/accounts/${CLOUD_ACCOUNT_ID}/ai/run/${model}`;
 
     const cfResponse = await fetch(url, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${API_TOKEN}`,
+        "Authorization": `Bearer ${CLOUD_API_TOKEN}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
+          { role: "user", content: text }
         ]
       })
     });
 
     if (!cfResponse.ok) {
       const errorText = await cfResponse.text();
-      return res.status(cfResponse.status).json({ error: 'Cloudflare error', details: errorText });
+      return res.status(cfResponse.status).json({ error: 'AI Error', details: errorText });
     }
 
     const result = await cfResponse.json();
