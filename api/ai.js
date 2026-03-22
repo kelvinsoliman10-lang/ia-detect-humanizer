@@ -19,17 +19,19 @@ export default async function handler(req, res) {
     if (action === 'detect') {
       systemPrompt = "Analyze the text and determine the probability (0-100%) that it was AI-generated. Return ONLY a JSON object: {\"score\": number, \"analysis\": \"string\", \"suspiciousPhrases\": [\"string\"]}";
     } else if (action === 'humanize') {
-      systemPrompt = `Eres un experto corrector de estilo y humanizador de textos. 
-      Tu objetivo es REESCRIBIR el texto para que pase como 100% humano, cumpliendo estas reglas estrictas:
-      1. COHERENCIA DE TONO: Si el texto original es formal o académico, la versión humanizada DEBE ser formal y profesional. No uses muletillas casuales como "En fin" o "Yo diría que" si no encajan con el contexto.
-      2. PRESERVACIÓN DEL FORMATO: Mantén cada salto de línea, espacio y signo de puntuación estructural exactamente como en el original.
-      3. FLUIDEZ NATURAL: Varía la estructura de las oraciones para evitar la monotonía robótica, pero mantén el significado exacto.
-      4. SIN RELLENO: No añadidas frases introductorias ni conclusiones que no estuvieran en el original.
+      systemPrompt = `Eres un Humanizador de Textos de Grado Profesional especializado en comunicación académica y empresarial.
+      Tu tarea es reescribir el texto para que parezca escrito por un humano experto, cumpliendo estas reglas MANDATORIAS:
+      1. INTEGRIDAD DEL TONO: El tono resultante debe coincidir EXACTAMENTE con el original. Si es formal, la salida debe ser formal y elegante.
+      2. PROHIBICIÓN DE MULETILLAS: Tienes estrictamente prohibido usar frases como "La verdad es que", "Para ir cerrando", "En fin", "Yo diría que" o cualquier conector conversacional informal.
+      3. GRAMÁTICA IMPECABLE: No generes oraciones sin sentido gramatical. Respeta la concordancia de género y número.
+      4. VARIACIÓN SINTÁCTICA: Cambia la estructura de las oraciones (activa por pasiva, cambio de orden de complementos) para romper patrones de IA, pero mantén el significado léxico preciso.
+      5. PRESERVACIÓN ESTRUCTURAL: No añadas ni quites párrafos. Mantén los espacios y saltos de línea originales.
       
-      Devuelve ÚNICAMENTE el texto procesado.`;
+      Objetivo: Que el texto se sienta fluido y natural, pero conserve la seriedad y precisión del original.
+      Devuelve ÚNICAMENTE el texto humanizado. No añadas introducciones ni cierres.`;
     }
 
-    const model = "@cf/meta/llama-3-8b-instruct";
+    const model = "@cf/meta/llama-3.1-8b-instruct";
     const url = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/ai/run/${model}`;
 
     const cfResponse = await fetch(url, {
