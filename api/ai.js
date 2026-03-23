@@ -26,12 +26,12 @@ export default async function handler(req, res) {
 
     // --- PRIORIDAD 1: GEMINI (SMART SELECTOR) ---
     if (GEMINI_API_KEY && GEMINI_API_KEY !== 'TU_API_KEY_AQUI' && GEMINI_API_KEY.length > 20) {
-      const models = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro', 'gemini-pro'];
+      const models = ['gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro', 'gemini-pro'];
       let lastError = null;
 
       for (const modelId of models) {
         try {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/${modelId}:generateContent?key=${GEMINI_API_KEY}`;
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${GEMINI_API_KEY}`;
           
           const geminiResponse = await fetch(geminiUrl, {
             method: "POST",
@@ -50,22 +50,33 @@ export default async function handler(req, res) {
             res.setHeader('X-AI-Engine', `Gemini-${modelId}`);
             return res.status(200).json({ response: responseText, engine: 'gemini' });
           } else {
-            // Si el error es 404 (model not found), probamos el siguiente modelo
             if (geminiResponse.status === 404) {
-              console.warn(`Model ${modelId} not found, trying next...`);
               lastError = data.error;
               continue; 
             }
-            // Si es otro error (ej: cuota), informamos al usuario
             if (data.error) {
               return res.status(geminiResponse.status).json({ error: 'Gemini Error', details: data.error.message });
             }
           }
         } catch (geminiErr) {
-          console.error(`Network error with ${modelId}, trying next...`);
+          console.error(`Network error with ${modelId}`);
         }
       }
       
+      // SI TODO FALLA, intentamos listar modelos para diagnosticar
+      try {
+        const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`;
+        const listRes = await fetch(listUrl);
+        const listData = await listRes.json();
+        if (listData.models) {
+          const available = listData.models.map(m => m.name.replace('models/', '')).join(', ');
+          return res.status(404).json({ 
+            error: 'Incompatibilidad de Modelos', 
+            details: `Tu clave solo soporta: ${available}. Por favor repórtame esta lista.` 
+          });
+        }
+      } catch (e) {}
+
       if (lastError) {
         return res.status(404).json({ error: 'Gemini Model Error', details: lastError.message });
       }
