@@ -24,36 +24,50 @@ export default async function handler(req, res) {
       - SIN PREÁMBULOS: Devuelve solo el texto convertido.`;
     }
 
-    // --- PRIORIDAD 1: GEMINI 1.5 FLASH (SI HAY API KEY) ---
+    // --- PRIORIDAD 1: GEMINI (SMART SELECTOR) ---
     if (GEMINI_API_KEY && GEMINI_API_KEY !== 'TU_API_KEY_AQUI' && GEMINI_API_KEY.length > 20) {
-      try {
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-        
-        const geminiResponse = await fetch(geminiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: `${systemPrompt}\n\nTEXTO A PROCESAR:\n${text}` }]
-            }]
-          })
-        });
+      const models = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro', 'gemini-pro'];
+      let lastError = null;
 
-        const data = await geminiResponse.json();
-        
-        if (geminiResponse.ok && data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
-          const responseText = data.candidates[0].content.parts[0].text.trim();
-          res.setHeader('X-AI-Engine', 'Gemini-1.5-Flash');
-          return res.status(200).json({ response: responseText, engine: 'gemini' });
-        } else {
-          console.error("Gemini API Error:", data.error || "Unknown Error");
-          // Si el error es de cuota o clave, devolvemos el error al cliente para que sepa qué pasa
-          if (data.error) {
-            return res.status(geminiResponse.status).json({ error: 'Gemini Error', details: data.error.message });
+      for (const modelId of models) {
+        try {
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/${modelId}:generateContent?key=${GEMINI_API_KEY}`;
+          
+          const geminiResponse = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: `${systemPrompt}\n\nTEXTO A PROCESAR:\n${text}` }]
+              }]
+            })
+          });
+
+          const data = await geminiResponse.json();
+          
+          if (geminiResponse.ok && data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
+            const responseText = data.candidates[0].content.parts[0].text.trim();
+            res.setHeader('X-AI-Engine', `Gemini-${modelId}`);
+            return res.status(200).json({ response: responseText, engine: 'gemini' });
+          } else {
+            // Si el error es 404 (model not found), probamos el siguiente modelo
+            if (geminiResponse.status === 404) {
+              console.warn(`Model ${modelId} not found, trying next...`);
+              lastError = data.error;
+              continue; 
+            }
+            // Si es otro error (ej: cuota), informamos al usuario
+            if (data.error) {
+              return res.status(geminiResponse.status).json({ error: 'Gemini Error', details: data.error.message });
+            }
           }
+        } catch (geminiErr) {
+          console.error(`Network error with ${modelId}, trying next...`);
         }
-      } catch (geminiErr) {
-        console.error("Gemini network error, falling back to optional Cloudflare...");
+      }
+      
+      if (lastError) {
+        return res.status(404).json({ error: 'Gemini Model Error', details: lastError.message });
       }
     }
 
