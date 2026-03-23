@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
     // --- PRIORIDAD 1: GEMINI (SMART SELECTOR) ---
     if (GEMINI_API_KEY && GEMINI_API_KEY !== 'TU_API_KEY_AQUI' && GEMINI_API_KEY.length > 20) {
-      const models = ['gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro', 'gemini-pro'];
+      const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-pro-latest'];
       let lastError = null;
 
       for (const modelId of models) {
