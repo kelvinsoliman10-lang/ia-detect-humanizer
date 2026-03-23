@@ -7,21 +7,21 @@ export default async function handler(req, res) {
   const { action, text } = req.body;
   const CLOUD_ACCOUNT_ID = process.env.VITE_CLOUDFLARE_ACCOUNT_ID;
   const CLOUD_API_TOKEN = process.env.VITE_CLOUDFLARE_API_TOKEN;
-  const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY;
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
   try {
     let systemPrompt = "";
     if (action === 'detect') {
       systemPrompt = "Analyze the text and determine the probability (0-100%) that it was AI-generated. Return ONLY a JSON object: {\"score\": number, \"analysis\": \"string\", \"suspiciousPhrases\": [\"string\"]}";
     } else if (action === 'humanize') {
-      systemPrompt = `Eres un Humanizador de Textos de Grado Profesional. 
-      Tu misión es reescribir el texto para que parezca 100% humano, eliminando cualquier rastro de IA pero manteniendo la esencia, el formato y el tono original.
-      REGLAS DE ORO:
-      1. GRAMÁTICA PERFECTA: No inventes palabras ni rompas la estructura gramatical.
-      2. CERO MULETILLAS: Prohibido usar "En fin", "La verdad es que", "Yo diría", etc.
-      3. SERIEDAD: Si el texto es formal, la respuesta DEBE ser formal.
-      4. FIDELIDAD: No añadas ni quites información. Solo cambia el estilo.
-      Devuelve ÚNICAMENTE el texto humanizado.`;
+      systemPrompt = `Eres un Humanizador de Textos de nivel experto.
+      Instrucciones Críticas:
+      - REESCRIBE el texto con máxima fluidez y naturalidad humana.
+      - MANTÉN SOCIAL EL REGISTRO: Si el original es formal, la salida debe ser 100% formal, técnica y profesional.
+      - PROHIBICIÓN ABSOLUTA: No añadas ni una sola palabra de relleno, muletilla o comentario personal.
+      - GRAMÁTICA: Tu gramática debe ser perfecta y sofisticada.
+      - FORMATO: Respeta cada salto de línea y espacio.
+      - SIN PREÁMBULOS: Devuelve solo el texto humanizado.`;
     }
 
     // --- PRIORIDAD 1: GEMINI 1.5 FLASH (SI HAY API KEY) ---
