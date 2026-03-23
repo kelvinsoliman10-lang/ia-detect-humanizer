@@ -286,7 +286,7 @@ function App() {
               <div className="nav-actions">
                 <div className="beta-info">
                   <span className="dot" />
-                  PUBLIC BETA V1.0
+                  PUBLIC BETA V2.0 (Gemini Mode)
                 </div>
                 <div className="badge-free">100% FREE ACCESS</div>
               </div>
