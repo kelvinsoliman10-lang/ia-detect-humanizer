@@ -339,31 +339,39 @@ function App() {
                         exit={{ opacity: 0, height: 0 }}
                         className="humanized-result-box"
                       >
-                        <div className="box-header">
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Sparkles size={14} />
-                            <span>Mejora Aplicada</span>
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="humanized-result"
+                      >
+                        <div className="result-header">
+                          <div className="header-info">
+                            <Sparkles size={16} className="text-primary" />
+                            <span>Resultado Humanizado</span>
                           </div>
-                          <button onClick={copyToClipboard} className="btn-action">
-                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                          <button onClick={copyToClipboard} className="btn-icon">
+                            {copied ? <Check size={16} /> : <Copy size={16} />}
                           </button>
                         </div>
                         <div className="result-content custom-scrollbar" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                           {humanizedText}
                         </div>
+                        
                         <div className="ai-disclaimer" style={{ 
                           fontSize: '0.7rem', 
-                          color: 'rgba(255,255,255,0.3)', 
+                          color: 'rgba(255,255,255,0.4)', 
                           marginTop: '0.8rem',
-                          paddingTop: '0.8rem',
-                          borderTop: '1px solid rgba(255,255,255,0.05)',
+                          padding: '0.6rem',
+                          background: 'rgba(255,255,255,0.03)',
+                          borderRadius: '8px',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.4rem'
+                          gap: '0.6rem'
                         }}>
-                          <AlertCircle size={10} />
-                          <span>La IA puede cometer errores. Por favor, revisa el resultado final.</span>
+                          <AlertCircle size={14} style={{ color: '#aaa' }} />
+                          <span>La IA de Gemini puede cometer errores. El contenido generado debe ser revisado antes de su uso profesional.</span>
                         </div>
+                      </motion.div>
                       </motion.div>
                     )}
                   </AnimatePresence>
